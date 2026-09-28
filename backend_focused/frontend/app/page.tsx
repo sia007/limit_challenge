@@ -1,7 +1,5 @@
-'use client';
-
 import { useState } from 'react';
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import {
   Box,
   Button,
@@ -113,7 +111,7 @@ export default function DashboardPage() {
           <Typography variant="h6" fontWeight={600}>
             Vehicles needing maintenance
           </Typography>
-          <Button component={Link} href="/vehicles" size="small">
+          <Button component={Link} to="/vehicles" size="small">
             View all vehicles
           </Button>
         </Stack>
@@ -161,7 +159,7 @@ export default function DashboardPage() {
                       <Chip size="small" color="warning" label="Overdue" />
                     </TableCell>
                     <TableCell align="right">
-                      <Button component={Link} href={`/vehicles/${vehicle.id}`} size="small">
+                      <Button component={Link} to={`/vehicles/${vehicle.id}`} size="small">
                         View
                       </Button>
                     </TableCell>

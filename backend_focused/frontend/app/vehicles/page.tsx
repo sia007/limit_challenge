@@ -1,8 +1,5 @@
-'use client';
-
-import { Suspense, useEffect, useMemo, useState } from 'react';
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Alert,
   Box,
@@ -65,18 +62,8 @@ function parsePage(searchParams: URLSearchParams): number {
 }
 
 export default function VehiclesPage() {
-  return (
-    <Suspense fallback={<LoadingBlock label="Loading vehicles…" />}>
-      <VehiclesPageContent />
-    </Suspense>
-  );
-}
-
-// useSearchParams() requires a Suspense boundary above it in the App Router,
-// hence the wrapper component above.
-function VehiclesPageContent() {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const appliedFilters = useMemo(() => parseFilters(searchParams), [searchParams]);
   const page = useMemo(() => parsePage(searchParams), [searchParams]);
@@ -112,7 +99,7 @@ function VehiclesPageContent() {
       params.set('mechanic_cert', filters.mechanicCertificationNumber);
     }
     if (newPage > 1) params.set('page', String(newPage));
-    router.push(`/vehicles${params.toString() ? `?${params}` : ''}`);
+    navigate(`/vehicles${params.toString() ? `?${params}` : ''}`);
   }
 
   function handleApplyFilters(event: React.FormEvent) {
@@ -312,7 +299,7 @@ function VehiclesPageContent() {
               {vehiclesQuery.data.results.map((vehicle) => (
                 <TableRow key={vehicle.id} hover>
                   <TableCell>
-                    <Link href={`/vehicles/${vehicle.id}`} style={{ textDecoration: 'none' }}>
+                    <Link to={`/vehicles/${vehicle.id}`} style={{ textDecoration: 'none' }}>
                       <Typography component="span" color="primary" fontWeight={600}>
                         {vehicle.year} {vehicle.make} {vehicle.model}
                       </Typography>

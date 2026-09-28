@@ -1,7 +1,4 @@
-'use client';
-
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { Link, useLocation } from 'react-router-dom';
 import { AppBar, Box, Container, Tab, Tabs, Toolbar, Typography } from '@mui/material';
 import LocalShippingOutlinedIcon from '@mui/icons-material/LocalShippingOutlined';
 
@@ -20,7 +17,7 @@ function activeTabValue(pathname: string) {
 }
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname();
+  const { pathname } = useLocation();
 
   return (
     <Box display="flex" flexDirection="column" minHeight="100%">
@@ -40,7 +37,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 value={item.href}
                 label={item.label}
                 component={Link}
-                href={item.href}
+                to={item.href}
                 sx={{ minHeight: 64, textTransform: 'none', fontWeight: 500 }}
               />
             ))}

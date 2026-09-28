@@ -1,5 +1,3 @@
-'use client';
-
 import { Alert, Box, CircularProgress, Typography } from '@mui/material';
 
 export function LoadingBlock({ label = 'Loading…' }: { label?: string }) {

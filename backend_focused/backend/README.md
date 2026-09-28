@@ -4,13 +4,13 @@ A Django + Django REST Framework backend for the Fleet Maintenance take-home
 challenge: CRUD for offices, vehicles, mechanics and maintenance records,
 plus the reporting/search endpoints described in the challenge brief.
 
-The frontend (Next.js + MUI) is also implemented, in `../frontend/` — see
+The frontend (React + Vite + MUI) is also implemented, in `../frontend/` — see
 `../frontend/README.md` for what it covers and how to run it.
 
 > **A note on verification.** This was written in a sandboxed environment
 > with no network access to PyPI (`pip install` fails there with a 403 -
 > the registry host isn't on that sandbox's egress allowlist), so
-> `python3 manage.py test` has never actually been *run* against this code,
+> `python manage.py test` has never actually been *run* against this code,
 > only carefully reviewed by hand (every model/migration field traced for a
 > match, every serializer/view cross-reference checked, the query-count
 > performance claim traced through step by step). Please run the test
@@ -41,18 +41,78 @@ backend/
 ## How to run the project
 
 > Running both the API and the frontend together? See
-> [`../RUNNING_LOCALLY.md`](../RUNNING_LOCALLY.md) for a combined walkthrough.
+> [`../RUNNING_LOCALLY.md`](../RUNNING_LOCALLY.md) for a combined walkthrough,
+> including a fuller troubleshooting table.
+
+### Prerequisite: Python 3.10 or newer
+
+```bash
+python3 --version      # must say 3.10 or newer (developed on 3.12)
+```
+
+> **Python 3.9 or older will not work.** This project pins Django 5.2 and
+> Django REST Framework 3.17, which require Python 3.10+. On 3.9,
+> `pip install -r requirements.txt` fails with `No matching distribution
+> found`, Django is never installed, and you then see
+> `ModuleNotFoundError: No module named 'django'` or
+> `Couldn't import Django`. macOS ships Python 3.9 as its system `python3`,
+> so install a newer one first:
+>
+> ```bash
+> brew install python@3.12        # macOS + Homebrew
+> # or: pyenv install 3.12 && pyenv local 3.12
+> # or: download the installer from https://www.python.org/downloads/
+> ```
+>
+> Then use `python3.12` (or whichever new version) in the `venv` command
+> below. If you previously created a `.venv` with the old Python, delete it
+> (`rm -rf .venv`) and recreate it - a venv stays tied to the Python that
+> built it.
+
+### Set up and start the server
+
+Run from `backend_focused/backend`:
 
 ```bash
 cd backend
-python3 -m venv .venv && source .venv/bin/activate
-python3 -m pip install -r requirements.txt
 
-python3 manage.py migrate
-python3 manage.py seed_fleet          # optional: fills the DB with fake data
-python3 manage.py createsuperuser     # optional: to browse /admin/
-python3 manage.py runserver 0.0.0.0:8000
+python3 -m venv .venv               # or python3.12 -m venv .venv
+source .venv/bin/activate           # Windows: .venv\Scripts\activate
+
+# Prompt should now start with (.venv). Sanity-check the interpreter:
+python --version                    # must say 3.10 or newer
+which python                        # must point inside .../backend/.venv/bin/
+
+python -m pip install -r requirements.txt
+python manage.py migrate
+python manage.py seed_fleet          # optional: fills the DB with fake data
+python manage.py createsuperuser     # optional: to browse /admin/
+python manage.py runserver 0.0.0.0:8000
 ```
+
+With the venv active, plain `python` and `pip` are the venv's own (so
+`python3` works too). Every new terminal needs `source .venv/bin/activate`
+again. If activation gives you trouble, call the venv's Python directly -
+this works in any terminal:
+
+```bash
+.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python manage.py migrate
+.venv/bin/python manage.py runserver 0.0.0.0:8000
+```
+
+### Troubleshooting
+
+| Symptom | Likely cause / fix |
+|---|---|
+| `ModuleNotFoundError: No module named 'django'` / `Couldn't import Django` | (1) Python older than 3.10, so `pip install` failed - check `python3 --version` and upgrade as above; (2) venv not active in this terminal - prompt should start with `(.venv)`; (3) `pip install` printed an error that was missed - re-run and read the output. |
+| `pip install` says `No matching distribution found for Django==5.2.12` | Python is 3.9 or older. Install 3.10+ and rebuild the venv. |
+| `pip install` shows connection/SSL/timeout errors | Network, VPN, or proxy blocking PyPI. |
+| `pip` installs into a different Python than the one you run | Always use `python -m pip ...` with the venv active. |
+| Works in one terminal, fails in a new one | Re-run `source .venv/bin/activate`. |
+| IDE terminal still fails | The IDE may force its own interpreter; try a plain system terminal, or point the IDE at `.venv/bin/python`. |
+| `no such table` | Run `python manage.py migrate`. |
+| Port 8000 in use | `python manage.py runserver 8001`. |
 
 The API is served at `http://localhost:8000/api/`. `DEBUG=True` and
 `CORS_ALLOW_ALL_ORIGINS=True` are left on for local/demo use (see
@@ -65,9 +125,9 @@ clients get plain JSON automatically via content negotiation.
 ### Seeding data
 
 ```bash
-python3 manage.py seed_fleet                 # default: 6 offices, 60 vehicles, 10 mechanics
-python3 manage.py seed_fleet --vehicles 200   # customize volume
-python3 manage.py seed_fleet --force          # wipe and reseed
+python manage.py seed_fleet                 # default: 6 offices, 60 vehicles, 10 mechanics
+python manage.py seed_fleet --vehicles 200   # customize volume
+python manage.py seed_fleet --force          # wipe and reseed
 ```
 
 The command uses `Faker` and deliberately:
@@ -81,7 +141,8 @@ The command uses `Faker` and deliberately:
 
 ```bash
 cd backend
-python3 manage.py test
+source .venv/bin/activate     # if not already active
+python manage.py test
 ```
 
 `fleet/tests.py` covers:
@@ -166,7 +227,7 @@ not for a real deployment. To run it somewhere else:
    served by Postgres). e.g. `DATABASE_URL` via `dj-database-url` or plain
    `ENGINE: django.db.backends.postgresql` + host/user/password from env
    vars.
-3. **Static files** — run `python3 manage.py collectstatic` and serve
+3. **Static files** — run `python manage.py collectstatic` and serve
    `STATIC_ROOT` via whitenoise or your reverse proxy (only the DRF
    Browsable API and Django admin need static assets here).
 4. **App server** — run with gunicorn behind nginx (or any PaaS buildpack
@@ -175,7 +236,7 @@ not for a real deployment. To run it somewhere else:
    pip install gunicorn
    gunicorn server.wsgi:application --bind 0.0.0.0:8000
    ```
-5. **Migrations & seed** — run `python3 manage.py migrate` as a release step.
+5. **Migrations & seed** — run `python manage.py migrate` as a release step.
    Don't run `seed_fleet` in production; it's a local/demo convenience only.
 6. **Container option** — a minimal `Dockerfile` for this project:
    ```dockerfile
@@ -275,6 +336,6 @@ not for a real deployment. To run it somewhere else:
 - JWT authentication (mentioned as an optional bonus in the brief).
 - The frontend is now implemented (see `../frontend/README.md`) - next would
   be recording the short end-to-end demo video the brief asks for.
-- I still haven't been able to actually *execute* `python3 manage.py test`
+- I still haven't been able to actually *execute* `python manage.py test`
   anywhere (see **Verifying this yourself** below) - that's the one thing
   I'd want to close out before calling this done-done.

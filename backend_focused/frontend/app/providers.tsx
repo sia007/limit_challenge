@@ -1,5 +1,3 @@
-'use client';
-
 import { CssBaseline, ThemeProvider, createTheme } from '@mui/material';
 import { PropsWithChildren, useMemo, useState } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';

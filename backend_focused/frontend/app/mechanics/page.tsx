@@ -1,5 +1,3 @@
-'use client';
-
 import { useState } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';

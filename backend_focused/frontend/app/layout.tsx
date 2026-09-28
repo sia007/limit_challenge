@@ -1,36 +1,16 @@
-import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
-import Providers from './providers';
+import { Outlet } from 'react-router-dom';
+
 import AppShell from '@/components/AppShell';
-import './globals.css';
+import Providers from './providers';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
-});
-
-export const metadata: Metadata = {
-  title: 'Fleet Tracker Challenge',
-  description: 'Frontend scaffold for the take-home assignment',
-};
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+// Root layout route: providers (React Query + MUI theme) and the nav shell wrap every page.
+// <Outlet /> renders whichever page route matched.
+export default function RootLayout() {
   return (
-    <html lang="en" className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">
-        <Providers>
-          <AppShell>{children}</AppShell>
-        </Providers>
-      </body>
-    </html>
+    <Providers>
+      <AppShell>
+        <Outlet />
+      </AppShell>
+    </Providers>
   );
 }

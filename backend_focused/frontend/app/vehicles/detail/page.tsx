@@ -1,8 +1,5 @@
-'use client';
-
 import { useState } from 'react';
-import Link from 'next/link';
-import { useParams, useRouter } from 'next/navigation';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import AddIcon from '@mui/icons-material/Add';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
@@ -48,7 +45,7 @@ import ConfirmDialog from '@/components/ConfirmDialog';
 
 export default function VehicleDetailPage() {
   const params = useParams<{ id: string }>();
-  const router = useRouter();
+  const navigate = useNavigate();
   const vehicleId = Number(params.id);
 
   const vehicleQuery = useVehicleDetail(vehicleId);
@@ -111,7 +108,7 @@ export default function VehicleDetailPage() {
 
   function handleDeleteVehicle() {
     deleteVehicle.mutate(vehicleId, {
-      onSuccess: () => router.push('/vehicles'),
+      onSuccess: () => navigate('/vehicles'),
     });
   }
 
@@ -154,7 +151,7 @@ export default function VehicleDetailPage() {
   return (
     <Stack spacing={4}>
       <Box>
-        <Button component={Link} href="/vehicles" size="small" startIcon={<ArrowBackIcon />} sx={{ mb: 1 }}>
+        <Button component={Link} to="/vehicles" size="small" startIcon={<ArrowBackIcon />} sx={{ mb: 1 }}>
           Back to vehicles
         </Button>
         <Stack direction="row" justifyContent="space-between" alignItems="flex-start">

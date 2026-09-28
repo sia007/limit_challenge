@@ -1,5 +1,3 @@
-'use client';
-
 import { Box, Card, CardContent, Typography } from '@mui/material';
 
 interface StatCardProps {
